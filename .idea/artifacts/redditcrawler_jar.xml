@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="redditcrawler:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/redditcrawler_jar</output-path>
+    <root id="archive" name="redditcrawler.jar">
+      <element id="module-output" name="redditcrawler" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/google/code/gson/gson/2.8.0/gson-2.8.0.jar" path-in-jar="/" />
+      <element id="library" level="project" name="Maven: com.google.code.gson:gson:2.8.0" />
+    </root>
+  </artifact>
+</component>

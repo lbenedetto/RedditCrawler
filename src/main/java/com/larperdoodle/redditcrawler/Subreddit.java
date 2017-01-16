@@ -8,9 +8,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.larperdoodle.redditcrawler.Main.calendar;
+
 
 public class Subreddit {
 	private final String name;
@@ -19,6 +24,9 @@ public class Subreddit {
 	//A subreddit is a node
 	private HashSet<Subreddit> links;
 	private int subscribers;
+	private int year;
+	private int month;
+	private boolean NSFW;
 
 	Subreddit(String name, int id) {
 		links = new HashSet<>();
@@ -37,13 +45,17 @@ public class Subreddit {
 			request.connect();
 			JsonParser jp = new JsonParser();
 			JsonElement root = jp.parse(new InputStreamReader((InputStream) request.getContent()));
-			JsonObject rootobj = root.getAsJsonObject();
-			//Get subscribers
-			subscribers = rootobj.getAsJsonObject("data").get("subscribers").getAsInt();
-			//Get description
-			String description = rootobj.getAsJsonObject("data").get("description").getAsString();
+			JsonObject data = root.getAsJsonObject().getAsJsonObject("data");
+			//Get data
+			NSFW = data.get("over18").getAsBoolean();
+			subscribers = data.get("subscribers").getAsInt();
+			String description = data.get("description").getAsString();
+			long timestamp = data.get("created_utc").getAsInt();
+			calendar.setTimeInMillis(timestamp*1000);
+			year = calendar.get(Calendar.YEAR);
+			month = calendar.get(Calendar.MONTH) + 1;
 			//Add related subs to list
-			Matcher m = Pattern.compile("/r/([A-Za-z]*)").matcher(description);
+			Matcher m = Pattern.compile("/r/([A-Za-z0-9_-]{1,20})").matcher(description);
 			while (m.find()) {
 				String sName = m.group(1).toLowerCase();
 				if (sName.equals(name) || sName.equals("")) continue;
@@ -59,8 +71,8 @@ public class Subreddit {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
 
+	}
 
 	void addRelatedSubsToQueue() {
 		for (Subreddit sub : links) {
@@ -69,19 +81,32 @@ public class Subreddit {
 		}
 	}
 
-	public HashSet<Subreddit> getLinks() {
+
+	int getYear() {
+		return year;
+	}
+
+	int getMonth() {
+		return month;
+	}
+
+	boolean isNSFW() {
+		return NSFW;
+	}
+
+	HashSet<Subreddit> getLinks() {
 		return links;
 	}
 
-	public String getName() {
+	String getName() {
 		return name;
 	}
 
-	public int getSubscribers() {
+	int getSubscribers() {
 		return subscribers;
 	}
 
-	public int getId() {
+	int getId() {
 		return id;
 	}
 

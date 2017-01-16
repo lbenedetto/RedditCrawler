@@ -13,7 +13,8 @@ public class OutputCSV {
 	void writeSubreddit(Subreddit s) {
 		String name = s.getName();
 		int id = s.getId();
-		Nodes.println(id + "," + name + "," + s.getSubscribers());
+		//id,name,subs,mm,yyyy,nsfw
+		Nodes.println(id + "," + name + "," + s.getSubscribers() + "," + s.getMonth() + "," + s.getYear() + "," + s.isNSFW());
 		for (Subreddit sub : s.getLinks()) {
 			Edges.println(id + "," + sub.getId());
 		}

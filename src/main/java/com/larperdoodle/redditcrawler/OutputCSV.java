@@ -1,5 +1,8 @@
 package com.larperdoodle.redditcrawler;
 
+import com.larperdoodle.redditcrawler.datastructures.Graph;
+import com.larperdoodle.redditcrawler.datastructures.node.Subreddit;
+
 import java.io.*;
 
 public class OutputCSV {
@@ -12,12 +15,16 @@ public class OutputCSV {
 
 	void writeSubreddit(Subreddit s) {
 		String name = s.getName();
-		int id = s.getId();
+		int id = s.getID();
 		//id,name,subs,mm,yyyy,nsfw
-		Nodes.println(id + "," + name + "," + s.getSubscribers() + "," + s.getMonth() + "," + s.getYear() + "," + s.isNSFW());
+		Nodes.println(s.toString());
 		for (Subreddit sub : s.getLinks()) {
-			Edges.println(id + "," + sub.getId());
+			Edges.println(id + "," + sub.getID());
 		}
+	}
+
+	void writeModeratorGraph(Graph g) {
+		g.breadthFirstPrint(Nodes, Edges);
 	}
 
 	public void shutdown() {
@@ -32,8 +39,8 @@ public class OutputCSV {
 
 	public void start() {
 		try {
-			File n = new File("nodes.csv");
-			File e = new File("edges.csv");
+			File n = new File("nodes(Moderators).csv");
+			File e = new File("edges(Moderators).csv");
 			n.createNewFile();
 			e.createNewFile();
 			Nodes = new PrintWriter(new BufferedWriter(new FileWriter(n, true)));

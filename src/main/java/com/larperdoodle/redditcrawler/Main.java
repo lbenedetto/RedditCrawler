@@ -1,5 +1,8 @@
 package com.larperdoodle.redditcrawler;
 
+import com.larperdoodle.redditcrawler.datastructures.Graph;
+import com.larperdoodle.redditcrawler.datastructures.node.Subreddit;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.*;
@@ -15,17 +18,18 @@ public class Main {
 	public static int autosave = 0;
 	public static int nodeNum = 0;
 	public static Calendar calendar = Calendar.getInstance();
+	public static final Graph moderatorGraph = new Graph();
+	public static final Graph subredditGraph = new Graph();
+	public static final String USER_AGENT = "RedditMapper v4.0";
+	public static final int SUBSCRIBER_THRESHOLD = 1000;
 
 	public static void main(String[] args) throws InterruptedException {
-		//loadExistingNodes();
-		//Load known subreddits into queue
-		//loadSubsIntoQueue();
-		subredditQueue.add(new Subreddit("dankmemes", 0));
+		subredditQueue.add(new Subreddit("dankmemes"));
 		subreddits.put("dankmemes", 0);
 		CSV = new OutputCSV();
 		Scanner kb = new Scanner(System.in);
 		Timer timer = new Timer();
-		timer.schedule(new AnalyzeSubreddit(), 0, 2000);
+		timer.schedule(new AnalyzeSubreddit(), 0, 4000);
 		try {
 			while (true) {
 				if (subredditQueue.isEmpty() || kb.hasNext()) {
@@ -59,44 +63,6 @@ public class Main {
 				CSV.restart();
 				autosave = 0;
 			}
-
 		}
 	}
-	public static void loadExistingNodes(){
-		try {
-			BufferedReader oldNodes = new BufferedReader(new FileReader("nodes.csv"));
-			String s;
-			Pattern p = Pattern.compile("(^\\d+),(.*),(.*)");
-			Matcher m;
-			while ((s = oldNodes.readLine()) != null) {
-				m = p.matcher(s);
-				while (m.find()) {
-					int id = Integer.parseInt(m.group(1));
-					String name = m.group(2);
-					subreddits.put(name, id);
-					vistedSubreddits.add(new Subreddit(name, id));
-				}
-			}
-			System.out.println("Old nodes loaded nodes");
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Could not load old nodes");
-		}
-	}
-	public static void loadSubsIntoQueue(){
-		try {
-			BufferedReader oldNodes = new BufferedReader(new FileReader("subs.txt"));
-			String s;
-			while ((s = oldNodes.readLine()) != null) {
-				subredditQueue.add(new Subreddit(s, id));
-				subreddits.put(s, id);
-				id++;
-			}
-			System.out.println("Known subs loaded");
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Could not load known subs");
-		}
-	}
-
 }

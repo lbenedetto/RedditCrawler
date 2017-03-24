@@ -1,10 +1,8 @@
 package com.larperdoodle.redditcrawler.datastructures;
 
-import com.larperdoodle.redditcrawler.Main;
-import com.larperdoodle.redditcrawler.datastructures.node.Moderator;
 import com.larperdoodle.redditcrawler.datastructures.node.Node;
 
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -13,30 +11,48 @@ import java.util.Queue;
 public class Graph {
 	private final HashMap<Node, HashSet<Edge>> adjacencyList;
 	private final HashMap<String, Node> nodes;
-
-	public Graph() {
+	private String graphName;
+	public Graph(String graphName) {
+		this.graphName = graphName;
 		adjacencyList = new HashMap<>();
 		nodes = new HashMap<>();
 	}
 
-	public void breadthFirstPrint(PrintWriter Nodes, PrintWriter Edges) {
-		Queue<Node> q = new LinkedList<>();
-		q.addAll(adjacencyList.keySet());
-		do {
-			Node n = q.remove();
-			Nodes.println(n.toString());
-			adjacencyList.get(n).forEach(x -> Edges.println(n.getID() + "," + x.dest.getID() + "," + x.weight));
-		} while (!q.isEmpty());
-
+	/**
+	 * Convert this graph into two .csv files representing Nodes and Edges
+	 */
+	public void outputCSV() {
+		try {
+			File nodes = new File("nodes(" + graphName + ").csv");
+			File edges = new File("edges(" + graphName + ").csv");
+			if(nodes.createNewFile() && edges.createNewFile()) {
+				PrintWriter nodeWriter = new PrintWriter(new BufferedWriter(new FileWriter(nodes, true)));
+				PrintWriter edgeWriter = new PrintWriter(new BufferedWriter(new FileWriter(edges, true)));
+				Queue<Node> q = new LinkedList<>();
+				q.addAll(adjacencyList.keySet());
+				do {
+					Node n = q.remove();
+					nodeWriter.println(n);
+					adjacencyList.get(n).forEach(edgeWriter::println);
+				} while (!q.isEmpty());
+				nodeWriter.close();
+				edgeWriter.close();
+			}else{
+				throw new IOException("Could not create files");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
-	public void addPair(Node src, Node dest) {
-		//TODO: Add progress indicator
-		System.out.println(src.getName() + "->" + dest.getName());
-		nodes.put(src.getName(), src);
-		nodes.put(dest.getName(), dest);
-		addEdge(src, new Edge(dest, 1));
-		addEdge(dest, new Edge(src, 1));
+	public void addPair(Node node1, Node node2) {
+		//TODO: Add a better progress indicator
+		System.out.println(node1.getName() + "<->" + node2.getName());
+		nodes.put(node1.getName(), node1);
+		nodes.put(node2.getName(), node2);
+		Edge e = new Edge(node1, node2, 1);
+		addEdge(node1, e);
+		addEdge(node2, e);
 	}
 
 	public void addNode(Node m) {
@@ -48,19 +64,18 @@ public class Graph {
 	}
 
 	private void addEdge(Node src, Edge edge) {
-		if (adjacencyList.containsKey(src)) {//If the node already exists
+		if (adjacencyList.containsKey(src)) {
 			HashSet<Edge> edges = adjacencyList.get(src);
-			if (edges.contains(edge)) {//If it already contains the edge
-				for (Edge e : edges) {//Increase the edge weight
-					if (e.dest.equals(edge.dest)) {
+			if (edges.contains(edge)) {
+				for (Edge e : edges)
+					if (e.equals(edge)) {
 						e.increaseWeight();
 						break;
 					}
-				}
 			} else {
-				edges.add(edge);//Add the new edge
+				edges.add(edge);
 			}
-		} else {//Create the node and add its new edge
+		} else {
 			HashSet<Edge> edges = new HashSet<>();
 			edges.add(edge);
 			adjacencyList.put(src, edges);
@@ -68,35 +83,42 @@ public class Graph {
 	}
 
 	private class Edge implements Comparable<Edge> {
-		final Node dest;
+		final Node n1;
+		final Node n2;
 		Integer weight;
 
-		Edge(Node dest, int weight) {
-			this.dest = dest;
+		Edge(Node n1, Node n2, int weight) {
+			this.n1 = n1;
+			this.n2 = n2;
 			this.weight = weight;
 		}
 
-		public void increaseWeight() {
+		void increaseWeight() {
 			weight++;
 		}
 
 		@Override
 		public int hashCode() {
-			return dest.hashCode();
+			return n1.hashCode();
 		}
 
 		@Override
 		public int compareTo(Edge e) {
-			return dest.compareTo(e.dest);
+			return weight.compareTo(e.weight);
 		}
 
 		@Override
 		public boolean equals(Object o) {
 			if (o instanceof Edge) {
 				Edge e = (Edge) o;
-				return dest.equals(e.dest);
+				return n1.equals(e.n1) && n2.equals(e.n2);
 			}
 			return false;
+		}
+
+		@Override
+		public String toString() {
+			return n1.getID() + "," + n2.getID() + "," + weight;
 		}
 	}
 

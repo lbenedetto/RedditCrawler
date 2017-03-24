@@ -1,7 +1,7 @@
 package com.larperdoodle.redditcrawler.datastructures.node;
 
 public abstract class Node implements Comparable<Node>{
-	private int id;
+	final private int id;
 	private String name;
 	private int subscribers;
 	public Node(String name, int id){
@@ -38,7 +38,7 @@ public abstract class Node implements Comparable<Node>{
 	public int getSubscribers() {
 		return subscribers;
 	}
-	public void addSubscribers(int s){
+	public void addSubs(int s){
 		subscribers += s;
 	}
 	public void setSubscribers(int s){

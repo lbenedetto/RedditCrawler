@@ -5,7 +5,7 @@ import com.larperdoodle.redditcrawler.Main;
 
 public class Moderator extends Node {
 	private static int mID = 0;
-	int subreddits;//Alt Node size
+	private int subreddits;//Alt Node size
 
 	public Moderator(String name) {
 		super(name, mID++);
@@ -27,7 +27,7 @@ public class Moderator extends Node {
 
 	@Override
 	public Node getNode(String name) {
-		Moderator m = (Moderator) Main.moderatorGraph.getNode(name);
+		Moderator m = (Moderator) Main.modGraph.getNode(name);
 		if (m == null) m = new Moderator(name);
 		return m;
 	}

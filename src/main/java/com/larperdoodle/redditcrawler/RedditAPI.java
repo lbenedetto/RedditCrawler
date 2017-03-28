@@ -73,27 +73,31 @@ class RedditAPI {
 
 	private static String[] getModeratorNames(JsonArray data) {
 		HashSet<String> moderatorNames = new HashSet<>();
-		//TODO: Only add moderators if they have "all" or "access" permissions
-		for (JsonElement e : data)
-			moderatorNames.add(e.getAsJsonObject().getAsJsonPrimitive("name").getAsString());
-		moderatorNames.remove("AutoModerator");
+		for (JsonElement e : data) {
+			String name = e.getAsJsonObject().getAsJsonPrimitive("name").getAsString();
+			if(name.equals("AutoModerator")) continue;
+			JsonArray permissions = e.getAsJsonObject().getAsJsonArray("mod_permissions");
+			boolean hasPerms = false;
+			for(JsonElement p : permissions){
+				String permission = p.getAsJsonPrimitive().getAsString();
+				if(permission.equals("all") || permission.equals("access"))
+					hasPerms = true;
+			}
+			if(hasPerms) moderatorNames.add(name);
+		}
 		//Need to convert to array because O(1) access is needed later
 		return moderatorNames.toArray(new String[moderatorNames.size()]);
 	}
 
 	private static void addModeratorsToGraph(String[] moderators, int subs) {
-		try {
-			for (int j = 0; j < moderators.length; j++) {
-				Moderator m1 = Moderator.getModerator(moderators[j]);
-				updateModerator(m1, subs);
-				for (int k = 0; k < moderators.length; k++) {
-					if (k == j) continue;
-					Moderator m2 = Moderator.getModerator(moderators[j]);
-					Main.modGraph.addPair(m1, m2);
-				}
+		for (int j = 0; j < moderators.length; j++) {
+			Moderator m1 = Moderator.getModerator(moderators[j]);
+			updateModerator(m1, subs);
+			for (int k = 0; k < moderators.length; k++) {
+				if (k == j) continue;
+				Moderator m2 = Moderator.getModerator(moderators[j]);
+				Main.modGraph.addPair(m1, m2);
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 

@@ -7,13 +7,18 @@ public class Moderator extends Node {
 	private static int mID = 0;
 	private int subreddits;//Alt Node size
 
-	public Moderator(String name) {
+	private Moderator(String name) {
 		super(name, mID++);
 		subreddits = 0;
 	}
 
-	public int getSubreddits() {
-		return subreddits;
+	public static Moderator getModerator(String name) {
+		Moderator m = (Moderator) Main.modGraph.getNode(name);
+		if (m == null) {
+			m = new Moderator(name);
+			Main.modGraph.addNode(m);
+		}
+		return m;
 	}
 
 	public void incrementSubreddits() {
@@ -23,12 +28,5 @@ public class Moderator extends Node {
 	@Override
 	public String toString() {
 		return getID() + "," + getName() + "," + getSubscribers() + "," + subreddits;
-	}
-
-	@Override
-	public Node getNode(String name) {
-		Moderator m = (Moderator) Main.modGraph.getNode(name);
-		if (m == null) m = new Moderator(name);
-		return m;
 	}
 }

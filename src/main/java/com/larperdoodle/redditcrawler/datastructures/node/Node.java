@@ -1,13 +1,15 @@
 package com.larperdoodle.redditcrawler.datastructures.node;
 
-public abstract class Node implements Comparable<Node>{
+public abstract class Node implements Comparable<Node> {
 	final private int id;
-	private String name;
+	private final String name;
 	private int subscribers;
-	public Node(String name, int id){
+
+	Node(String name, int id) {
 		this.name = name;
 		this.id = id;
 	}
+
 	@Override
 	public int hashCode() {
 		return getName().hashCode();
@@ -27,7 +29,7 @@ public abstract class Node implements Comparable<Node>{
 		return name.compareTo(n.getName());
 	}
 
-	public String getName(){
+	public String getName() {
 		return name;
 	}
 
@@ -38,13 +40,14 @@ public abstract class Node implements Comparable<Node>{
 	public int getSubscribers() {
 		return subscribers;
 	}
-	public void addSubs(int s){
-		subscribers += s;
-	}
-	public void setSubscribers(int s){
+
+	void setSubscribers(int s) {
 		subscribers = s;
 	}
 
+	public void addSubs(int s) {
+		subscribers += s;
+	}
+
 	public abstract String toString();
-	public abstract Node getNode(String name);
 }

@@ -9,13 +9,14 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class Graph {
-	private final HashMap<Node, HashSet<Edge>> adjacencyList;
+	private final HashMap<Node, HashSet<Edge>> edges;
 	private final HashMap<String, Node> nodes;
-	private String graphName;
-	public Graph(String graphName) {
+	private final String graphName;
+
+	public Graph(String graphName, int estimatedNumNodes) {
 		this.graphName = graphName;
-		adjacencyList = new HashMap<>();
-		nodes = new HashMap<>();
+		edges = new HashMap<>(estimatedNumNodes * 10);
+		nodes = new HashMap<>(estimatedNumNodes);
 	}
 
 	/**
@@ -25,19 +26,19 @@ public class Graph {
 		try {
 			File nodes = new File("nodes(" + graphName + ").csv");
 			File edges = new File("edges(" + graphName + ").csv");
-			if(nodes.createNewFile() && edges.createNewFile()) {
+			if (nodes.createNewFile() && edges.createNewFile()) {
 				PrintWriter nodeWriter = new PrintWriter(new BufferedWriter(new FileWriter(nodes, true)));
 				PrintWriter edgeWriter = new PrintWriter(new BufferedWriter(new FileWriter(edges, true)));
 				Queue<Node> q = new LinkedList<>();
-				q.addAll(adjacencyList.keySet());
+				q.addAll(this.edges.keySet());
 				do {
 					Node n = q.remove();
 					nodeWriter.println(n);
-					adjacencyList.get(n).forEach(edgeWriter::println);
+					this.edges.get(n).forEach(edgeWriter::println);
 				} while (!q.isEmpty());
 				nodeWriter.close();
 				edgeWriter.close();
-			}else{
+			} else {
 				throw new IOException("Could not create files");
 			}
 		} catch (IOException e) {
@@ -46,11 +47,10 @@ public class Graph {
 	}
 
 	public void addPair(Node node1, Node node2) {
-		//TODO: Add a better progress indicator
-		System.out.println(node1.getName() + "<->" + node2.getName());
+		System.out.printf("%s:%d<->%s:%d\n", node1.getName(), node1.getID(), node2.getName(), node2.getID());
 		nodes.put(node1.getName(), node1);
 		nodes.put(node2.getName(), node2);
-		Edge e = new Edge(node1, node2, 1);
+		Edge e = new Edge(node1, node2);
 		addEdge(node1, e);
 		addEdge(node2, e);
 	}
@@ -64,8 +64,8 @@ public class Graph {
 	}
 
 	private void addEdge(Node src, Edge edge) {
-		if (adjacencyList.containsKey(src)) {
-			HashSet<Edge> edges = adjacencyList.get(src);
+		if (edges.containsKey(src)) {
+			HashSet<Edge> edges = this.edges.get(src);
 			if (edges.contains(edge)) {
 				for (Edge e : edges)
 					if (e.equals(edge)) {
@@ -78,7 +78,7 @@ public class Graph {
 		} else {
 			HashSet<Edge> edges = new HashSet<>();
 			edges.add(edge);
-			adjacencyList.put(src, edges);
+			this.edges.put(src, edges);
 		}
 	}
 
@@ -87,10 +87,10 @@ public class Graph {
 		final Node n2;
 		Integer weight;
 
-		Edge(Node n1, Node n2, int weight) {
+		Edge(Node n1, Node n2) {
 			this.n1 = n1;
 			this.n2 = n2;
-			this.weight = weight;
+			this.weight = 1;
 		}
 
 		void increaseWeight() {

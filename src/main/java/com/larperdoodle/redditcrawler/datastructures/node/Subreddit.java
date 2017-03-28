@@ -5,19 +5,28 @@ import com.larperdoodle.redditcrawler.Main;
 
 import java.util.Calendar;
 
-import static com.larperdoodle.redditcrawler.Main.calendar;
-
 public class Subreddit extends Node {
+	private static final Calendar calendar = Calendar.getInstance();
 	private static int sID = 0;
 	//A subreddit is a node
 	private int year;
 	private int month;
 	private boolean NSFW;
 
-	public Subreddit(String name) {
+	private Subreddit(String name) {
 		super(name, sID++);
 	}
-	public void setData(JsonObject data){
+
+	public static Subreddit getSubreddit(String name) {
+		Subreddit s = (Subreddit) Main.subGraph.getNode(name);
+		if (s == null) {
+			s = new Subreddit(name);
+			Main.subGraph.addNode(s);
+		}
+		return s;
+	}
+
+	public void setData(JsonObject data) {
 		long timestamp = data.get("created_utc").getAsInt();
 		calendar.setTimeInMillis(timestamp * 1000);
 		year = calendar.get(Calendar.YEAR);
@@ -29,12 +38,5 @@ public class Subreddit extends Node {
 	@Override
 	public String toString() {
 		return getID() + "," + getName() + "," + getSubscribers() + "," + month + "," + year + "," + NSFW;
-	}
-
-	@Override
-	public Node getNode(String name) {
-		Subreddit n = (Subreddit) Main.subGraph.getNode(name);
-		if (n == null) n = new Subreddit(name);
-		return n;
 	}
 }

@@ -8,15 +8,32 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class Graph {
+public class Graph implements Serializable {
 	private final HashMap<Node, HashSet<Edge>> edges;
 	private final HashMap<String, Node> nodes;
 	private final String graphName;
 
-	public Graph(String graphName, int estimatedNumNodes) {
+	private Graph(String graphName, int estimatedNumNodes) {
 		this.graphName = graphName;
 		edges = new HashMap<>(estimatedNumNodes * 10);
 		nodes = new HashMap<>(estimatedNumNodes);
+	}
+
+	public static Graph load(String graphName, int estimatedNumNodes) {
+		FileInputStream fis;
+		ObjectInputStream in;
+		Graph graph;
+		try {
+			fis = new FileInputStream(graphName);
+			in = new ObjectInputStream(fis);
+			graph = (Graph) in.readObject();
+			in.close();
+			if (graph == null) throw new FileNotFoundException("Could not load graph");
+			return graph;
+		} catch (Exception ex) {
+			System.out.println("Could not find graph, creating new one");
+			return new Graph(graphName, estimatedNumNodes);
+		}
 	}
 
 	/**
@@ -46,6 +63,20 @@ public class Graph {
 		}
 	}
 
+	public void save() {
+		FileOutputStream fos;
+		ObjectOutputStream out;
+		try {
+			fos = new FileOutputStream(graphName);
+			out = new ObjectOutputStream(fos);
+			out.writeObject(this);
+			out.close();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
 	public void addPair(Node node1, Node node2) {
 		System.out.printf("%s:%d<->%s:%d\n", node1.getName(), node1.getID(), node2.getName(), node2.getID());
 		nodes.put(node1.getName(), node1);
@@ -55,8 +86,13 @@ public class Graph {
 		addEdge(node2, e);
 	}
 
-	public void addNode(Node m) {
-		nodes.put(m.getName(), m);
+	public void addNode(Node n) {
+		nodes.put(n.getName(), n);
+	}
+
+	public void removeNode(Node n) {
+		nodes.remove(n.getName());
+		edges.remove(n);
 	}
 
 	public Node getNode(String name) {

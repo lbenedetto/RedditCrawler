@@ -1,6 +1,8 @@
 package com.larperdoodle.redditcrawler.datastructures.node;
 
-public abstract class Node implements Comparable<Node> {
+import java.io.Serializable;
+
+public abstract class Node implements Comparable<Node>, Serializable {
 	final private int id;
 	private final String name;
 	private int subscribers;

@@ -26,8 +26,14 @@ class RedditAPI {
 		try {
 			VISITED.add(name);
 			JsonObject data = getSubredditJson(name);
+			if(data == null) return;
 			Subreddit sub = Subreddit.getSubreddit(name);
-			sub.setData(data);
+			try {
+				sub.setData(data);
+			}catch(NullPointerException e){
+				Main.subGraph.removeNode(sub);
+				return;
+			}
 			processRelatedSubs(data, sub);
 			if (sub.getSubscribers() > SUBSCRIBER_THRESHOLD) {
 				String[] moderators = getModeratorNames(getModeratorJson(name));
@@ -61,7 +67,6 @@ class RedditAPI {
 	}
 
 	private static JsonElement getJson(String name, String urlModifier) throws Exception {
-		Thread.sleep(2000);
 		String sURL = "https://www.reddit.com/r/" + name + "/about" + urlModifier + ".json";
 		URL url = new URL(sURL);
 		HttpURLConnection request = (HttpURLConnection) url.openConnection();
@@ -95,7 +100,7 @@ class RedditAPI {
 			updateModerator(m1, subs);
 			for (int k = 0; k < moderators.length; k++) {
 				if (k == j) continue;
-				Moderator m2 = Moderator.getModerator(moderators[j]);
+				Moderator m2 = Moderator.getModerator(moderators[k]);
 				Main.modGraph.addPair(m1, m2);
 			}
 		}
